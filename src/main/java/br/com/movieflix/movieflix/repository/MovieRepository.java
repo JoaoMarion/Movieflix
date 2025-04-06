@@ -8,5 +8,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface CategoryRepository extends JpaRepository<Category, Long> {
+public interface MovieRepository extends JpaRepository<Movie, Long> {
+    List<Movie> findMovieByCategories(List<Category> categories);
 }

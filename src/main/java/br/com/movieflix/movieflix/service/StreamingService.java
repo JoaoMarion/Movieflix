@@ -1,6 +1,6 @@
 package br.com.movieflix.movieflix.service;
 
-import br.com.movieflix.movieflix.entity.Category;
+
 import br.com.movieflix.movieflix.entity.Streaming;
 import br.com.movieflix.movieflix.repository.StreamingRepository;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +13,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class StreamingService {
     private final StreamingRepository streamingRepository;
+
 
     public List<Streaming> findAll() {
         return streamingRepository.findAll();

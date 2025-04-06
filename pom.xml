@@ -86,12 +86,12 @@
 		</dependency>
 
 		<!-- Spring Security (descomentado se precisar) -->
-		<!--
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
-        -->
+
 
 		<!-- Dependências para testes -->
 		<dependency>
