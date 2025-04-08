@@ -6,6 +6,7 @@ import br.com.movieflix.movieflix.controller.request.UserRequest;
 import br.com.movieflix.movieflix.controller.response.LoginResponse;
 import br.com.movieflix.movieflix.controller.response.UserResponse;
 import br.com.movieflix.movieflix.entity.User;
+import br.com.movieflix.movieflix.exception.UsernameOrPasswordInvalidException;
 import br.com.movieflix.movieflix.mapper.UserMapper;
 import br.com.movieflix.movieflix.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -35,13 +36,20 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
-        UsernamePasswordAuthenticationToken userAndPass = new UsernamePasswordAuthenticationToken(request.email(), request.password());
-        Authentication authenticaticate = authenticationManager.authenticate(userAndPass);
+        try{
+            UsernamePasswordAuthenticationToken userAndPass = new UsernamePasswordAuthenticationToken(request.email(), request.password());
+            Authentication authenticaticate = authenticationManager.authenticate(userAndPass);
 
-        User user = (User) authenticaticate.getPrincipal();
-        String token = tokenService.generateToken(user);
+            User user = (User) authenticaticate.getPrincipal();
+            String token = tokenService.generateToken(user);
 
-        return ResponseEntity.ok(new LoginResponse(token));
+            return ResponseEntity.ok(new LoginResponse(token));
+
+        } catch (Exception e){
+            throw  new UsernameOrPasswordInvalidException("Usuario ou senha invalidos.");
+        }
+
+
 
     }
 
