@@ -31,5 +31,12 @@ build/
 
 ### VS Code ###
 .vscode/
-
+### variaveis ###
 .env
+
+### Docker ###
+*.log
+*.tmp
+*.swp
+pgdata/
+.docker/

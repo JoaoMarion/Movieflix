@@ -20,6 +20,9 @@ public class SecurityFilter extends OncePerRequestFilter {
 
     private final TokenService tokenService;
 
+
+
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
