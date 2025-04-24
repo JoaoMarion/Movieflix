@@ -34,6 +34,9 @@ public class SecurityConfig {
                         .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                         .requestMatchers(HttpMethod.POST,"/movieflix/auth/register").permitAll()
                         .requestMatchers(HttpMethod.POST, "/movieflix/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.DELETE, RoutePaths.ADMIN_DELETE_ROUTES).hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/movieflix/user").hasRole("ADMIN")
+
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)

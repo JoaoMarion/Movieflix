@@ -1,7 +1,9 @@
 package br.com.movieflix.movieflix.service;
 
 import br.com.movieflix.movieflix.controller.response.UserResponse;
+import br.com.movieflix.movieflix.entity.Role;
 import br.com.movieflix.movieflix.entity.User;
+import br.com.movieflix.movieflix.repository.RoleRepository;
 import br.com.movieflix.movieflix.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,11 +18,15 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
 
     public User save(User user){
+        Role userRole = roleRepository.findByName("user")
+                .orElseThrow(() -> new RuntimeException("Role 'user' não encontrada"));
             String password = user.getPassword();
             user.setPassword(passwordEncoder.encode(password));
+            user.setRoles(List.of(userRole));
             return userRepository.save(user);
     }
 

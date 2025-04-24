@@ -7,12 +7,16 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -37,8 +41,14 @@ public class SecurityFilter extends OncePerRequestFilter {
             if (optJwtUserData.isPresent()) {
                 JWTUserData userData = optJwtUserData.get();
 
+                List<GrantedAuthority> authorities = userData.roles().stream()
+                        .filter(role -> role.getName() != null) // Evita NullPointerException
+                        .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getName().toUpperCase()))
+                        .collect(Collectors.toList());
+
+
                 UsernamePasswordAuthenticationToken authenticationToken =
-                        new UsernamePasswordAuthenticationToken(userData, null, null);
+                        new UsernamePasswordAuthenticationToken(userData, null, authorities);
 
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
             }
