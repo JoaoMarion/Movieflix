@@ -6,6 +6,7 @@ import br.com.movieflix.movieflix.controller.request.UserRequest;
 import br.com.movieflix.movieflix.controller.response.LoginResponse;
 import br.com.movieflix.movieflix.controller.response.UserResponse;
 import br.com.movieflix.movieflix.entity.User;
+import br.com.movieflix.movieflix.exception.EmailAlreadyExist;
 import br.com.movieflix.movieflix.exception.UsernameOrPasswordInvalidException;
 import br.com.movieflix.movieflix.mapper.UserMapper;
 import br.com.movieflix.movieflix.service.UserService;
@@ -20,6 +21,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Optional;
+
 @RestController
 @RequestMapping("/movieflix/auth")
 @RequiredArgsConstructor
@@ -30,8 +33,15 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<UserResponse> register(@RequestBody UserRequest request) {
-        User savedUser = userService.save(UserMapper.toUser(request));
-        return ResponseEntity.status(HttpStatus.CREATED).body(UserMapper.toUserResponse(savedUser));
+        User user = UserMapper.toUser(request);
+
+        if (userService.findByEmail(user.getEmail()).isPresent()) {
+            throw new EmailAlreadyExist("Já existe um Usuario com esse email");
+        }
+        User savedUser = userService.save(user);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(UserMapper.toUserResponse(savedUser));
+
     }
 
     @PostMapping("/login")
