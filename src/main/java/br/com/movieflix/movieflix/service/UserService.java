@@ -64,6 +64,10 @@ public class UserService {
         return userRepository.findUserByEmail(email);
     }
 
+    public Optional<UserDetails> findByRefreshToken(String token){
+        return userRepository.findByRefreshToken_RefreshToken(token);
+    }
+
     public Optional<User> findById(Long id){
         return userRepository.findById(id);
     }

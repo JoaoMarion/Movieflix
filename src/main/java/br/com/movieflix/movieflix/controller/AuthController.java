@@ -2,16 +2,19 @@ package br.com.movieflix.movieflix.controller;
 
 import br.com.movieflix.movieflix.config.TokenService;
 import br.com.movieflix.movieflix.controller.request.LoginRequest;
+import br.com.movieflix.movieflix.controller.request.RefreshRequest;
 import br.com.movieflix.movieflix.controller.request.UserRequest;
 import br.com.movieflix.movieflix.controller.request.VerificationCodeRequest;
 import br.com.movieflix.movieflix.controller.response.LoginResponse;
 import br.com.movieflix.movieflix.controller.response.UserResponse;
 import br.com.movieflix.movieflix.controller.response.VerificationCodeResponse;
 import br.com.movieflix.movieflix.entity.User;
+import br.com.movieflix.movieflix.entity.embedded.RefreshToken;
 import br.com.movieflix.movieflix.exception.EmailAlreadyExist;
 import br.com.movieflix.movieflix.exception.UsernameOrPasswordInvalidException;
 import br.com.movieflix.movieflix.mapper.UserMapper;
 import br.com.movieflix.movieflix.mapper.VerificationCodeMapper;
+import br.com.movieflix.movieflix.repository.UserRepository;
 import br.com.movieflix.movieflix.service.EmailService;
 import br.com.movieflix.movieflix.service.UserService;
 import jakarta.mail.MessagingException;
@@ -23,10 +26,12 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 
@@ -38,6 +43,7 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final TokenService tokenService;
     private final EmailService emailService;
+    private final UserRepository userRepository;
 
     @PostMapping("/register")
     public ResponseEntity<UserResponse> register(@RequestBody UserRequest request) {
@@ -82,8 +88,18 @@ public class AuthController {
 
             User user = (User) authenticaticate.getPrincipal();
             String token = tokenService.generateToken(user);
+            String refreshToken = tokenService.generateRefreshToken(user);
 
-            return ResponseEntity.ok(new LoginResponse(token));
+            user.setRefreshToken(
+                    RefreshToken.builder()
+                            .refreshToken(refreshToken)
+                            .expireAt(LocalDateTime.now().plusDays(7))
+                            .build()
+            );
+
+            userService.saveUpdate(user);
+
+            return ResponseEntity.ok(new LoginResponse(token, refreshToken));
 
         } catch (DisabledException e) {
             throw new DisabledException("Usuario não Confirmado");
@@ -119,6 +135,32 @@ public class AuthController {
                         .body(new VerificationCodeResponse("Código de verificação inválido.")));
     }
 
+    @PostMapping("/refresh")
+    public ResponseEntity<LoginResponse> refresh(@RequestBody RefreshRequest request) {
+
+        UserDetails userDetails = userService.findByRefreshToken(request.refreshToken())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Refresh token inválido."));
+
+        User user = (User) userDetails;
+
+        if (user.getRefreshToken().getExpireAt().isBefore(LocalDateTime.now())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Refresh token expirado.");
+        }
+
+
+        String newAccessToken = tokenService.generateToken(user);
+        String newRefreshToken = tokenService.generateRefreshToken(user);
+
+        user.setRefreshToken(RefreshToken.builder()
+                .refreshToken(newRefreshToken)
+                .expireAt(LocalDateTime.now().plusDays(7))
+                .build());
+
+        userService.saveUpdate(user);
+
+
+        return ResponseEntity.ok(new LoginResponse(newAccessToken, newRefreshToken));
+    }
 
 
 }

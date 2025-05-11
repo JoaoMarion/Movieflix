@@ -1,5 +1,6 @@
 package br.com.movieflix.movieflix.entity;
 
+import br.com.movieflix.movieflix.entity.embedded.RefreshToken;
 import br.com.movieflix.movieflix.entity.embedded.VerificationCode;
 import jakarta.persistence.*;
 import lombok.*;
@@ -49,6 +50,13 @@ public class User implements UserDetails {
             @AttributeOverride(name = "expireAt", column = @Column(name = "verification_code_expire_at", nullable = true))
     })
     private VerificationCode verificationCode;
+
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "refreshToken", column = @Column(name = "refresh_token", nullable = true)),
+            @AttributeOverride(name = "expireAt", column = @Column(name = "refresh_token_expire_at", nullable = true))
+    })
+    private RefreshToken refreshToken;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
