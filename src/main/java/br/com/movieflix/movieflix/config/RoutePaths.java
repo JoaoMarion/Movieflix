@@ -9,13 +9,27 @@ public class RoutePaths {
             "/movieflix/streaming/**",
     };
 
-    public static final String[] USER_ROUTES = {
-            "/movieflix/profile/**",
-            "/movieflix/movies/**"
+    public static final String[] ADMIN_GET_ROUTES = {
+            "/actuator/**",
+            "/movieflix/user"
     };
 
-    public static final String[] PUBLIC_ROUTES = {
-            "/auth/login",
-            "/auth/register",
+    public static final String[] ADMIN_PUT_ROUTES = {
+
+    };
+
+    public static final String[] ADMIN_POST_ROUTES = {
+
+    };
+
+    public static final String[] PUBLIC_POST_ROUTES = {
+            "/movieflix/auth/login",
+            "/movieflix/auth/register",
+            "/movieflix/auth/refresh",
+            "/movieflix/auth/verify"
+    };
+
+    public static final String[] PUBLIC_GET_ROUTES = {
+            "/movieflix/auth/verifyToken"
     };
 }

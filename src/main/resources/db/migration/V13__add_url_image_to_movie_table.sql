@@ -1,0 +1,2 @@
+ALTER TABLE movie
+ADD COLUMN url_image VARCHAR(255)

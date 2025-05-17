@@ -52,12 +52,10 @@ public class SecurityConfig {
                 .sessionManagement(session->session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize ->authorize
                         .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
-                        .requestMatchers(HttpMethod.POST,"/movieflix/auth/register").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/movieflix/auth/login").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/movieflix/auth/verify").permitAll()
+                        .requestMatchers(HttpMethod.POST, RoutePaths.PUBLIC_POST_ROUTES).permitAll()
+                        .requestMatchers(HttpMethod.GET, RoutePaths.PUBLIC_GET_ROUTES).permitAll()
                         .requestMatchers(HttpMethod.DELETE, RoutePaths.ADMIN_DELETE_ROUTES).hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/movieflix/user").hasRole("ADMIN")
-
+                        .requestMatchers(HttpMethod.GET, RoutePaths.ADMIN_GET_ROUTES).hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)

@@ -37,7 +37,7 @@ public class TokenService {
                 .withClaim("userId", user.getId())
                 .withClaim("userName", user.getName())
                 .withClaim("userRoles", roleNames)
-                .withExpiresAt(Instant.now().plusSeconds(3600))
+                .withExpiresAt(Instant.now().plusSeconds(900))
                 .withIssuedAt(Instant.now())
                 .withIssuer("MovieFlix")
                 .sign(algorithm);
@@ -71,6 +71,21 @@ public class TokenService {
         }
 
 
+    }
+
+    public String extractEmail(String token) {
+        try {
+            Algorithm algorithm = Algorithm.HMAC256(secret);
+
+            DecodedJWT jwt = JWT.require(algorithm)
+                    .withIssuer("MovieFlix")
+                    .build()
+                    .verify(token);
+
+            return jwt.getSubject();
+        } catch (JWTVerificationException ex) {
+            throw new JWTVerificationException("Token inválido ou expirado");
+        }
     }
 
     public String generateRefreshToken(User user) {

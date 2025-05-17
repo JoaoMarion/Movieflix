@@ -17,6 +17,7 @@ import br.com.movieflix.movieflix.mapper.VerificationCodeMapper;
 import br.com.movieflix.movieflix.repository.UserRepository;
 import br.com.movieflix.movieflix.service.EmailService;
 import br.com.movieflix.movieflix.service.UserService;
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -27,10 +28,7 @@ import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
@@ -137,16 +135,14 @@ public class AuthController {
 
     @PostMapping("/refresh")
     public ResponseEntity<LoginResponse> refresh(@RequestBody RefreshRequest request) {
-
         UserDetails userDetails = userService.findByRefreshToken(request.refreshToken())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Refresh token inválido."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Não autorizado."));
 
         User user = (User) userDetails;
 
         if (user.getRefreshToken().getExpireAt().isBefore(LocalDateTime.now())) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Refresh token expirado.");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Não autorizado.");
         }
-
 
         String newAccessToken = tokenService.generateToken(user);
         String newRefreshToken = tokenService.generateRefreshToken(user);
@@ -158,8 +154,38 @@ public class AuthController {
 
         userService.saveUpdate(user);
 
-
         return ResponseEntity.ok(new LoginResponse(newAccessToken, newRefreshToken));
+    }
+
+
+    @GetMapping("/verifyToken")
+    public ResponseEntity<Void> verifyToken(@RequestHeader("Authorization") String authHeader) {
+        try {
+
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
+
+            String token = authHeader.replace("Bearer ", "");
+
+            String email = tokenService.extractEmail(token);
+
+
+            UserDetails userDetails = userService.findByEmail(email)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Usuário não encontrado."));
+            User user = (User) userDetails;
+
+
+            if (!user.isEnabled()) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
+
+            return ResponseEntity.ok().build();
+        } catch (JWTVerificationException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
 

@@ -3,6 +3,7 @@ package br.com.movieflix.movieflix.config;
 import br.com.movieflix.movieflix.exception.EmailAlreadyExist;
 import br.com.movieflix.movieflix.exception.UserNotFound;
 import br.com.movieflix.movieflix.exception.UsernameOrPasswordInvalidException;
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -28,6 +29,12 @@ public class ApplicationControllerAdvice {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public String handuserNotFound(UserNotFound ex){
         return ex.getMessage();
+    }
+
+    @ExceptionHandler({JWTVerificationException.class})
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public String handleJwtException(JWTVerificationException ex) {
+        return "Token inválido ou expirado.";
     }
 
 }

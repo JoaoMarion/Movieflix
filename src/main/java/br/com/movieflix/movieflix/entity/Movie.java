@@ -27,6 +27,9 @@ public class Movie {
 
     private String description;
 
+    @Column(name = "url_image")
+    private String urlImage;
+
     @Column(name = "release_date")
     private LocalDate releaseDate;
 

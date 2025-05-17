@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class EmailService {
     private final JavaMailSender javaMailSender;
-    @Value("${API_EMAIL}")
+    @Value("${spring.mail.username}")
     private String emailApi;
 
 

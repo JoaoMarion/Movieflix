@@ -16,6 +16,7 @@ public record MovieRequest(
         LocalDate releaseDate,
         double rating,
         List<Long> categories,
-        List<Long> streamings
+        List<Long> streamings,
+        String urlImage
 ) {
 }

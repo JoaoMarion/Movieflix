@@ -15,6 +15,7 @@ public record MovieResponse(
         LocalDate releaseDate,
         double rating,
         List<CategoryResponse> categories,
-        List<StreamingResponse> streamings
+        List<StreamingResponse> streamings,
+        String urlMovie
 ) {
 }
